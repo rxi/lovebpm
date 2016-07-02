@@ -10,7 +10,7 @@ function love.load()
   love.audio.setVolume(.6)
   font = love.graphics.newFont(50)
   paused = false
-  radius = 0
+  pulse = 0
   -- Init new Track object and start playing
   music = lovebpm.newTrack()
     :load("loop.ogg")
@@ -19,7 +19,7 @@ function love.load()
     :on("beat", function(n)
       local r, g, b = math.random(90), math.random(90), math.random(90)
       love.graphics.setBackgroundColor(r, g, b)
-      radius = 150
+      pulse = 1
     end)
     :play()
 end
@@ -27,7 +27,7 @@ end
 
 function love.update(dt)
   music:update()
-  radius = math.max(100, radius - dt * 75)
+  pulse = math.max(0, pulse - dt)
 end
 
 
@@ -48,7 +48,8 @@ function love.draw()
   local w, h = love.graphics.getDimensions()
 
   -- Draw circle
-  love.graphics.setLineWidth(4)
+  local radius = 80 + pulse ^ 3 * 20
+  love.graphics.setLineWidth(8)
   love.graphics.setColor(255, 255, 255, 255 * 0.3)
   love.graphics.circle("line", w / 2, h / 2, radius)
 
