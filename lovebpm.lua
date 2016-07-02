@@ -46,18 +46,18 @@ function lovebpm.detectBpm(filename, opts)
   local channels = data:getChannels()
   local samplerate = data:getSampleRate()
   data:getSample( data:getSampleCount() * 2 - 1)
-  -- Gets peak amplitude over a number of samples at `n` seconds
-  local function getPeak(n)
+  -- Gets max amplitude over a number of samples at `n` seconds
+  local function getAmplitude(n)
     local count = samplerate * channels / 200
     local at = n * channels * samplerate
     if at + count > data:getSampleCount() then
       return 0
     end
-    local peak = 0
+    local a = 0
     for i = 0, count - 1 do
-      peak = math.max(peak, math.abs( data:getSample(at + i) ))
+      a = math.max(a, math.abs( data:getSample(at + i) ))
     end
-    return peak
+    return a
   end
   -- Get track duration and init results table
   local dur = data:getDuration("seconds")
@@ -75,7 +75,7 @@ function lovebpm.detectBpm(filename, opts)
     end
     local acc = 0
     for i = 0, n - 1 do
-      acc = acc + getPeak(dur / n * i)
+      acc = acc + getAmplitude(dur / n * i)
     end
     -- Round BPM to 3 decimal places
     bpm = math.floor(bpm * 1000 + .5) / 1000
