@@ -250,33 +250,31 @@ function Track:update()
   local beat = self:getBeat()
   local last = self.lastBeat
   if beat ~= last then
-    if #self.listeners.beat > 0 then
-      -- Assure that the `beat` event is done once for each beat, even in cases
-      -- where more than one beat has passed since the last update, or the song
-      -- has looped
-      local total = self:getTotalBeats()
-      local b = beat
-      local x = 0
-      if last then
-        x = last + 1
-        -- If the last beat is greater than the current beat then the song has
-        -- reached the end: if we're looping then set the current beat to after
-        -- the tracks's end so incrementing towards it still works.
-        if x > b then
-          if self.looping then
-            self:emit("loop")
-            b = b + total
-          else
-            self:emit("end")
-            self:stop()
-          end
+    -- Assure that the `beat` event is done once for each beat, even in cases
+    -- where more than one beat has passed since the last update, or the song
+    -- has looped
+    local total = self:getTotalBeats()
+    local b = beat
+    local x = 0
+    if last then
+      x = last + 1
+      -- If the last beat is greater than the current beat then the song has
+      -- reached the end: if we're looping then set the current beat to after
+      -- the tracks's end so incrementing towards it still works.
+      if x > b then
+        if self.looping then
+          self:emit("loop")
+          b = b + total
+        else
+          self:emit("end")
+          self:stop()
         end
       end
-      -- Emit beat event for each passed beat
-      while x <= b do
-        self:emit("beat", x % total)
-        x = x + 1
-      end
+    end
+    -- Emit beat event for each passed beat
+    while x <= b do
+      self:emit("beat", x % total)
+      x = x + 1
     end
   end
   -- Set last beat
