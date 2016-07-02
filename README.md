@@ -22,7 +22,7 @@ function:
 music = lovebpm.newTrack()
 ```
 
-The `update()` function of each track should be called from within the
+The `update()` method of each track should be called from within the
 `love.update()` function:
 
 ```lua
@@ -31,8 +31,8 @@ function love.update(dt)
 end
 ```
 
-The track's `load()` function should be called to load in the music. The load
-function takes a single argument: the music's filename or a `SoundData` object.
+The track's `load()` method should be called to load in the music. The load
+method takes a single argument: the music's filename or a `SoundData` object.
 The `setBpm()` method should be called with the BPM of the loaded track.
 
 ```lua
