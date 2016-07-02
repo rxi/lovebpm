@@ -239,7 +239,7 @@ function Track:update()
   if self.lastBeat then
     local t = time
     if t < self.time then
-      t = t - self.totalTime
+      t = t + self.totalTime
     end
     self:emit("update", t - self.time)
   else
