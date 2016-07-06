@@ -280,7 +280,6 @@ function Track:update()
   end
   self.time = time
 
-
   -- Current beat doesn't match last beat?
   local beat = self:getBeat()
   local last = self.lastBeat
