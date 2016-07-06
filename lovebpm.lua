@@ -201,7 +201,7 @@ end
 
 
 function Track:setBeat(n)
-  return self.setTime(n * self.period)
+  return self:setTime(n * self.period)
 end
 
 
