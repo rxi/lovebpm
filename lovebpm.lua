@@ -200,8 +200,8 @@ end
 function Track:setTime(n)
   if not self.source then return end
   self.source:seek(n)
-  self.time = self.source:tell("seconds")
-  self.lastSourceTime = self.time
+  self.time = n
+  self.lastSourceTime = n
   self.lastBeat = self:getBeat() - 1
   return self
 end
