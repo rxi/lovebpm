@@ -32,11 +32,11 @@ end
 
 function lovebpm.detectBpm(filename, opts)
   -- Init options table
-  local default = { minbpm = 75, maxbpm = 300 }
-  opts = opts or {}
-  for k, v in pairs(default) do
-    opts[k] = opts[k] or v
+  local t = { minbpm = 75, maxbpm = 300 }
+  for k, v in pairs(t) do
+    t[k] = opts[k] or v
   end
+  opts = t
 
   -- Load data
   local data = filename
