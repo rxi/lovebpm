@@ -23,6 +23,7 @@ function lovebpm.newTrack()
   self.listeners = {}
   self.period = 60 / 120
   self.lastBeat = nil
+  self.lastSourceTime = 0
   self.time = 0
   self.totalTime = 0
   return self
@@ -36,6 +37,7 @@ function lovebpm.detectBpm(filename, opts)
   for k, v in pairs(default) do
     opts[k] = opts[k] or v
   end
+
   -- Load data
   local data = filename
   if type(data) == "string" then
@@ -46,6 +48,7 @@ function lovebpm.detectBpm(filename, opts)
   local channels = data:getChannels()
   local samplerate = data:getSampleRate()
   data:getSample( data:getSampleCount() * 2 - 1)
+
   -- Gets max amplitude over a number of samples at `n` seconds
   local function getAmplitude(n)
     local count = samplerate * channels / 200
@@ -59,13 +62,16 @@ function lovebpm.detectBpm(filename, opts)
     end
     return a
   end
+
   -- Get track duration and init results table
   local dur = data:getDuration("seconds")
   local results = {}
+
   -- Get maximum allowed BPM
   local step = 8
   local n = (dur * opts.maxbpm / 60)
   n = math.floor(n / step) * step
+
   -- Fill table with BPMs and their average on-the-beat amplitude until the
   -- minimum allowed BPM is reached
   while true do
@@ -83,6 +89,7 @@ function lovebpm.detectBpm(filename, opts)
     table.insert(results, { bpm = bpm, avg = acc / n })
     n = n - step
   end
+
   -- Sort table by greatest average on-the-beat amplitude. The one with the
   -- greatest average is assumed to be the correct bpm
   table.sort(results, function(a, b) return a.avg > b.avg end)
@@ -183,6 +190,7 @@ function Track:stop()
   self.lastBeat = nil
   if self.source then
     self.source:stop()
+    self.lastSourceTime = 0
     self.time = 0
   end
   return self
@@ -190,12 +198,11 @@ end
 
 
 function Track:setTime(n)
-  self.time = n
-  if self.source then
-    self.source:seek(n)
-    self.time = self.source:tell("seconds")
-    self.lastBeat = self:getBeat() - 1
-  end
+  if not self.source then return end
+  self.source:seek(n)
+  self.time = self.source:tell("seconds")
+  self.lastSourceTime = self.time
+  self.lastBeat = self:getBeat() - 1
   return self
 end
 
@@ -230,11 +237,37 @@ function Track:getBeat(multiplier)
 end
 
 
-function Track:update()
+function Track:update(dt)
   if not self.source then return self end
-  -- Get time and apply offset
-  local time = self.source:tell("seconds")
-  time = (time + self.offset) % self.totalTime
+
+  -- Get source time and apply offset
+  local sourceTime = self.source:tell("seconds")
+  sourceTime = sourceTime + self.offset
+
+  -- If the source time is the same as the last time and the source is playing,
+  -- we use the frame's delta time to guess how much time has passed, this
+  -- assures the timing values (eg, the subbeat on :getBeat()) are updated each
+  -- frame, even when the time being returned by the :tell() function is updated
+  -- at a lower rate than the framerate
+  local time
+  if sourceTime == self.lastSourceTime and self.source:isPlaying() then
+    local dt = love.timer.getDelta()
+    time = self.time + dt * self.pitch
+  else
+    -- If the the current source time is earlier than the last time (which may
+    -- have had frame-delta-time added to it), the last time is reused to give
+    -- us a delta time of 0 instead of a negative value
+    if sourceTime < self.time then
+      time = self.time
+    else
+      time = sourceTime
+    end
+  end
+  self.lastSourceTime = sourceTime
+  -- Assure time is within proper bounds in case the offset or added
+  -- frame-delta-time made it overshoot
+  time = time % self.totalTime
+
   -- Calculate deltatime and emit update event; set time
   if self.lastBeat then
     local t = time
@@ -246,6 +279,8 @@ function Track:update()
     self:emit("update", 0)
   end
   self.time = time
+
+
   -- Current beat doesn't match last beat?
   local beat = self:getBeat()
   local last = self.lastBeat
@@ -279,6 +314,7 @@ function Track:update()
   end
   -- Set last beat
   self.lastBeat = beat
+
   return self
 end
 
