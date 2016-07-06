@@ -188,10 +188,10 @@ end
 
 function Track:stop()
   self.lastBeat = nil
+  self.time = 0
+  self.lastSourceTime = 0
   if self.source then
     self.source:stop()
-    self.time = 0
-    self.lastSourceTime = 0
   end
   return self
 end
