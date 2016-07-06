@@ -237,7 +237,7 @@ function Track:getBeat(multiplier)
 end
 
 
-function Track:update(dt)
+function Track:update()
   if not self.source then return self end
 
   -- Get source time and apply offset
