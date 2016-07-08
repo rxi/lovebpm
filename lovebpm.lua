@@ -26,6 +26,7 @@ function lovebpm.newTrack()
   self.lastSourceTime = 0
   self.time = 0
   self.totalTime = 0
+  self.dtMultiplier = 1
   return self
 end
 
@@ -239,30 +240,36 @@ end
 function Track:update()
   if not self.source then return self end
 
+  -- The frame-delta-time is used for time-keeping as the value returned by
+  -- :tell() is updated at a potentially lower rate than the framerate.
+  local time
+  if self.source:isPlaying() then
+    local dt = love.timer.getDelta() * self.dtMultiplier
+    time = self.time + dt * self.pitch
+  else
+    time = self.time
+  end
+
   -- Get source time and apply offset
   local sourceTime = self.source:tell("seconds")
   sourceTime = sourceTime + self.offset
 
-  -- If the source time is the same as the last time and the source is playing,
-  -- we use the frame's delta time to guess how much time has passed, this
-  -- assures the timing values (eg, the subbeat on :getBeat()) are updated each
-  -- frame, even when the time being returned by the :tell() function is updated
-  -- at a lower rate than the framerate
-  local time
-  if sourceTime == self.lastSourceTime and self.source:isPlaying() then
-    local dt = love.timer.getDelta()
-    time = self.time + dt * self.pitch
-  else
-    -- If the the current source time is earlier than the last time (which may
-    -- have had frame-delta-time added to it), the last time is reused to give
-    -- us a delta time of 0 instead of a negative value
-    if sourceTime < self.time then
-      time = self.time
+  -- If the value returned by the :tell() function has updated we check to see
+  -- if we are in sync within an allowed threshold -- if we're out of sync we
+  -- adjust the dtMultiplier to resync gradually
+  if sourceTime ~= self.lastSourceTime then
+    local diff = time - sourceTime
+    -- Check if the difference is beyond the threshold -- If the difference is
+    -- too great we assume the track has looped and treat it as being within the
+    -- threshold
+    if math.abs(diff) > 0.01 and math.abs(diff) < self.totalTime / 2 then
+      self.dtMultiplier = math.max(0, 1 - diff * 2)
     else
-      time = sourceTime
+      self.dtMultiplier = 1
     end
+    self.lastSourceTime = sourceTime
   end
-  self.lastSourceTime = sourceTime
+
   -- Assure time is within proper bounds in case the offset or added
   -- frame-delta-time made it overshoot
   time = time % self.totalTime
@@ -313,7 +320,6 @@ function Track:update()
       x = x + 1
     end
   end
-
 
   return self
 end
