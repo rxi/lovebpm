@@ -17,7 +17,7 @@ function love.load()
     :setBpm(127)
     :setLooping(true)
     :on("beat", function(n)
-      local r, g, b = math.random(90), math.random(90), math.random(90)
+      local r, g, b = math.random(255), math.random(255), math.random(255)
       love.graphics.setBackgroundColor(r, g, b)
       pulse = 1
     end)
