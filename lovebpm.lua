@@ -283,6 +283,9 @@ function Track:update()
   local beat = self:getBeat()
   local last = self.lastBeat
   if beat ~= last then
+    -- Last beat is set here as one of the event handlers can potentially set it
+    -- by calling :setTime() or :setBeat()
+    self.lastBeat = beat
     -- Assure that the `beat` event is done once for each beat, even in cases
     -- where more than one beat has passed since the last update, or the song
     -- has looped
@@ -310,8 +313,7 @@ function Track:update()
       x = x + 1
     end
   end
-  -- Set last beat
-  self.lastBeat = beat
+
 
   return self
 end
