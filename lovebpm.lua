@@ -23,6 +23,7 @@ function lovebpm.newTrack()
   self.listeners = {}
   self.period = 60 / 120
   self.lastBeat = nil
+  self.lastUpdateTime = nil
   self.lastSourceTime = 0
   self.time = 0
   self.totalTime = 0
@@ -190,6 +191,7 @@ end
 function Track:stop()
   self.lastBeat = nil
   self.time = 0
+  self.lastUpdateTime = nil
   self.lastSourceTime = 0
   if self.source then
     self.source:stop()
@@ -241,12 +243,16 @@ end
 function Track:update()
   if not self.source then return self end
 
-  -- The frame-delta-time is used for time-keeping as the value returned by
-  -- :tell() is updated at a potentially lower rate than the framerate.
+  -- Get delta time: getTime() is used for time-keeping as the value returned by
+  -- :tell() is updated at a potentially lower rate than the framerate
+  local t = love.timer.getTime()
+  local dt = self.lastUpdateTime and (t - self.lastUpdateTime) or 0
+  self.lastUpdateTime = t
+
+  -- Set new time
   local time
   if self.source:isPlaying() then
-    local dt = love.timer.getDelta() * self.dtMultiplier
-    time = self.time + dt * self.pitch
+    time = self.time + dt * self.dtMultiplier * self.pitch
   else
     time = self.time
   end
