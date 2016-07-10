@@ -32,7 +32,7 @@ function lovebpm.newTrack()
 end
 
 
-function lovebpm.detectBpm(filename, opts)
+function lovebpm.detectBPM(filename, opts)
   -- Init options table
   opts = opts or {}
   local t = { minbpm = 75, maxbpm = 300 }
@@ -115,7 +115,7 @@ function Track:load(filename)
 end
 
 
-function Track:setBpm(n)
+function Track:setBPM(n)
   self.period = 60 / n
   return self
 end

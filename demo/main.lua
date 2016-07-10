@@ -14,7 +14,7 @@ function love.load()
   -- Init new Track object and start playing
   music = lovebpm.newTrack()
     :load("loop.ogg")
-    :setBpm(127)
+    :setBPM(127)
     :setLooping(true)
     :on("beat", function(n)
       local r, g, b = math.random(255), math.random(255), math.random(255)

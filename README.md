@@ -33,11 +33,11 @@ end
 
 The track's `load()` method should be called to load in the music. The load
 method takes a single argument: the music's filename or a `SoundData` object.
-The `setBpm()` method should be called with the BPM of the loaded track.
+The `setBPM()` method should be called with the BPM of the loaded track.
 
 ```lua
 music:load("loop.ogg")
-music:setBpm(127)
+music:setBPM(127)
 ```
 
 An event handler function for the `beat` event can be set. This will be called
@@ -61,7 +61,7 @@ See the [demo](demo) directory for a small example project.
 #### lovebpm.newTrack()
 Creates and returns a new `Track` object.
 
-#### lovebpm.detectBpm(filename [, opts])
+#### lovebpm.detectBPM(filename [, opts])
 Tries to detect the BPM of a looped song. `filename` can be a filename or
 `SoundData` object. An `opts` table can be provided with additional options,
 consisting of the following:
@@ -74,7 +74,7 @@ consisting of the following:
 #### Track:load(filename)
 Loads an audio file or `SoundData` object.
 
-#### Track:setBpm(n)
+#### Track:setBPM(n)
 Sets the BPM of the current track; this is used when calculating the current
 beat.
 
