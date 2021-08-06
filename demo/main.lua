@@ -17,7 +17,7 @@ function love.load()
     :setBPM(127)
     :setLooping(true)
     :on("beat", function(n)
-      local r, g, b = math.random(255), math.random(255), math.random(255)
+      local r, g, b = math.random(), math.random(), math.random()
       love.graphics.setBackgroundColor(r, g, b)
       pulse = 1
     end)
@@ -50,7 +50,7 @@ function love.draw()
   -- Draw circle
   local radius = 80 + pulse ^ 3 * 20
   love.graphics.setLineWidth(8)
-  love.graphics.setColor(255, 255, 255, 255 * 0.3)
+  love.graphics.setColor(1, 1, 1, 1 * 0.3)
   love.graphics.circle("line", w / 2, h / 2, radius)
 
   -- Get current beat and subbeat with 4x multiplier
@@ -59,7 +59,7 @@ function love.draw()
   -- Draw 4x subbeat progress arc
   local angle1 = -math.pi / 2
   local angle2 = math.pi * 2 * subbeat - math.pi / 2
-  love.graphics.setColor(255, 255, 255)
+  love.graphics.setColor(1, 1, 1)
   love.graphics.arc("line", "open", w / 2, h / 2, radius, angle1, angle2)
 
   -- Get current beat and subbeat
